@@ -374,13 +374,13 @@ plt.show()
         <div class="code-section">
             <div class="code-meta">
                 <div class="code-title">2. GFS Data: MSLP and Surface Winds</div>
-                <div style="color: var(--accent); font-size: 0.85rem; font-weight: 500;">NOELLE DAVIS</div>
+                <div style="color: var(--accent); font-size: 0.85rem; font-weight: 500;">MATTHEW LENTZ</div>
             </div>
             <div class="code-desc">Converts surface mass fields into millibars, extracting vector components to isolate kinematic wind magnitude scaling values.</div>
             <pre><code class="language-python">
 """
 Created on Wed Apr 22 15:06:29 2026
-@author: Noelle Davis
+@author: MATTHEW LENTZ
 """
 
 import pygrib 
@@ -522,7 +522,7 @@ plt.show()
         <div class="code-section">
             <div class="code-meta">
                 <div class="code-title">4. Hurricane Sandy Radar Data</div>
-                <div style="color: var(--accent); font-size: 0.85rem; font-weight: 500;">NOELLE DAVIS</div>
+                <div style="color: var(--accent); font-size: 0.85rem; font-weight: 500;">MATTHEW LENTZ</div>
             </div>
             <div class="code-desc">Ingests complex structural array sweeps via MetPy out of Level II binary radar structures, normalizing radial data matrices into geometric coordinates.</div>
             <pre><code class="language-python">
@@ -532,7 +532,7 @@ plt.show()
 # SPDX-License-Identifier: BSD-3-Clause
 """
 Created on Wed Apr 29 15:08:03 2026
-@author: Noelle Davis
+@author: MATTHEW LENTZ
 """
 
 import cartopy.crs as ccrs
@@ -637,11 +637,11 @@ plt.show()
         <div class="code-section">
             <div class="code-meta">
                 <div class="code-title">5. Hurricane Sandy Related Soundings</div>
-                <div style="color: var(--accent); font-size: 0.85rem; font-weight: 500;">SOUNDERPY WRAPPERS</div>
+                <div style="color: var(--accent); font-size: 0.85rem; font-weight: 500;">SOUNDERPY SOUNDINGS</div>
             </div>
-            <div class="code-desc">Invokes internal Sounderpy wrappers to retrieve real-time atmospheric vertical profiles without needing local file databases.</div>
+            <div class="code-desc">This code from SounderPy collects real-time balloon-launched data of the atmosphere, such as temperature, humidity, and wind at different heights, without needing any saved data files on your computer.</div>
             <pre><code class="language-python">
-# For more information on sounderpy, check out their documentation here --> https://kylejgillett.github.io/sounderpy/
+# For more information on SounderPy, check out their documentation here --> https://kylejgillett.github.io/sounderpy/
 
 import sounderpy as spy
 
