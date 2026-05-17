@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hurricane Sandy Analysis - Documentation</title>
+    <title>Hurricane Sandy Python Analysis - Documentation</title>
     
     <style>
         :root {
@@ -17,29 +17,48 @@
             line-height: 1.6;
             color: var(--text-color);
             background-color: var(--bg-color);
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 40px 20px;
         }
-        h1, h2, h3 {
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            color: #111827;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        h2 {
             color: #111827;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 8px;
-            margin-top: 40px;
+            margin-top: 50px;
         }
-        p { margin-bottom: 20px; }
-        .output-box {
-            background: #e0f2fe;
-            border-left: 4px solid var(--primary-color);
-            padding: 15px;
-            border-radius: 4px;
-            margin: 20px 0;
-            font-family: monospace;
+        h3 { margin-top: 30px; color: #374151; }
+        p, li { font-size: 1.05em; }
+        .toc {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        /* Make the code block fit nicely */
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc li { margin-bottom: 10px; }
+        .toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .toc a:hover { text-decoration: underline; }
+        
+        /* Prism overrides */
         pre[class*="language-"] {
             border-radius: 8px;
-            margin: 20px 0;
+            margin: 20px 0 40px 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
     </style>
@@ -49,49 +68,392 @@
 </head>
 <body>
 
-    <h1>Hurricane Sandy Analysis: GFS Data</h1>
-    <p>This script downloads, processes, and plots GFS (Global Forecast System) data for the 500mb Geopotential Height and Relative Humidity during Hurricane Sandy.</p>
+    <header>
+        <h1>Hurricane Sandy Analysis</h1>
+        <p>Comprehensive Python documentation for meteorological data extraction, processing, and visualization.</p>
+    </header>
 
-    <h2>1. Prerequisites</h2>
-    <p>Before running the code, ensure you have the required Python libraries installed. You can install them via pip:</p>
-    <pre><code class="language-bash">pip install matplotlib numpy xarray cartopy</code></pre>
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#gfs-500mb">1. GFS Data: 500mb Geopotential Height and Relative Humidity</a></li>
+            <li><a href="#gfs-mslp">2. GFS Data: Mean Sea Level Pressure and Surface Winds</a></li>
+            <li><a href="#meteogram">3. Buoy Station Meteogram</a></li>
+            <li><a href="#radar">4. KDIX Radar Data Analysis</a></li>
+            <li><a href="#soundings">5. Related Atmospheric Soundings</a></li>
+        </ul>
+    </div>
 
-    <h2>2. What the Code Does</h2>
-    <ul>
-        <li><strong>Fetches Data:</strong> Accesses historical GFS weather models.</li>
-        <li><strong>Processes Variables:</strong> Isolates the 500mb pressure level for geopotential height.</li>
-        <li><strong>Visualizes:</strong> Plots the data onto a geographical map using Cartopy.</li>
-    </ul>
-
-    <h2>3. The Python Code</h2>
-    <p>Copy and paste the code below into your local environment:</p>
-    
+    <h2 id="gfs-500mb">1. GFS Data: 500mb Geopotential Height & Relative Humidity</h2>
+    <p>This script processes GRIB2 data to extract the 500mb geopotential height and relative humidity. It creates a cropped regional map using Cartopy, converting heights to decameters and temperatures to Celsius.</p>
     <pre><code class="language-python">
-import matplotlib.pyplot as plt
-import numpy as np
-# Example placeholder for your actual script
-def plot_hurricane_sandy():
-    print("Fetching GFS Data for Hurricane Sandy...")
-    # Your analysis code goes here
-    height = 500
-    print(f"Plotting {height}mb Geopotential Height.")
+"""
+Created on Wed Apr 22 15:09:48 2026
+@author: Matthew Lentz
+"""
 
-if __name__ == "__main__":
-    plot_hurricane_sandy()
+# 500mb Geopotential Height and Relative Humidity
+import pygrib
+import numpy as np
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+
+# Update the string below with the path to your GRIB data file.
+grbs = pygrib.open('gfs_4_20121029_0600_027.grb2')
+
+""" Uncomment the loop below to find the specific meteorological variable of your choice."""
+#for msg in grbs:
+#     print(msg)
+
+hgtMSG = grbs[103]
+
+# Divide the 500mb Geopotential height by 10 since the meteorological charts display heights in decameters (dm) rather than meters.
+hgt = hgtMSG.values/10.0 
+[lats, lons] = hgtMSG.latlons()
+
+# Subtract by 273 (or 273.15) since we want to use Celsius and not Kelvin
+tempMSG= grbs[104]
+temp = tempMSG.values - 273 
+
+rhMSG = grbs[105]
+rh = rhMSG.values
+
+# Define the coordinates for the specific region of interest
+domain = (lons &gt;= 270) &amp; (lons &lt;= 305) &amp; (lats &gt;= 20) &amp; (lats &lt;= 55)
+
+# Find the row and column edges of this region
+rows = np.where(np.any(domain, axis=1))[0]
+cols = np.where(np.any(domain, axis=0))[0]
+
+row1 = rows.min()
+row2 = rows.max() + 1
+col1 = cols.min()
+col2 = cols.max() + 1
+
+# Crop all the data arrays down to that smaller enclosure
+lats = lats[row1:row2, col1:col2]
+lons = lons[row1:row2, col1:col2]
+hgt = hgt[row1:row2, col1:col2]
+temp = temp[row1:row2, col1:col2]
+rh = rh[row1:row2, col1:col2]
+
+# Convert longitude from a 0-360 scale to a standard -180 to 180 scale
+lons = lons - 360
+
+
+fig = plt.figure(figsize=(8, 8))
+
+proj = ccrs.LambertConformal(central_longitude=-90.0, central_latitude=35.0)
+ax = plt.axes(projection=proj)
+ax.set_extent([-90, -65, 30, 50], crs=ccrs.PlateCarree())
+
+ax.add_feature(cfeature.LAND, facecolor='wheat')
+ax.add_feature(cfeature.OCEAN, facecolor='lightblue')
+ax.add_feature(cfeature.LAKES, facecolor='lightblue')
+ax.add_feature(cfeature.STATES, edgecolor='grey')
+ax.add_feature(cfeature.BORDERS, edgecolor='grey')
+
+# Gridlines 
+glx = ax.gridlines(crs=ccrs.PlateCarree(),draw_labels=['bottom'], x_inline=False,y_inline=False,rotate_labels=True,color='white', linestyle='--', xlocs=np.arange(-90, -65, 5),ylocs=[]) 
+gly = ax.gridlines(crs=ccrs.PlateCarree(),draw_labels=['right'], x_inline=False,y_inline=False,color='white', linestyle='--', xlocs=[],ylocs=np.arange(30, 50, 4)) 
+glx.xpadding=10
+glx.xlabel_style={'rotation':385}
+ 
+rhFILL = ax.contourf(lons, lats, rh, levels=[70, 80, 90, 100], cmap='Greens', transform=ccrs.PlateCarree())
+
+hgtLEVELS = np.arange(520, 585, 5)
+hgtCONTOURS = ax.contour(lons, lats, hgt, levels=hgtLEVELS, colors='black', linewidths=2, transform=ccrs.PlateCarree())
+ax.clabel(hgtCONTOURS, levels=hgtLEVELS, inline=True, fontsize=10, fmt='%d')
+
+""" Uncomment the series of code below if you want to use temperature readings as well."""
+#tempMIN = np.min(temp)
+#tempMAX = np.max(temp)
+#tempLEVELS = np.arange(tempMIN, tempMAX, 3)
+#tempCONTOURS = ax.contour(lons, lats, temp, levels=tempLEVELS, cmap='cool_r', linestyles='dotted', transform=ccrs.PlateCarree())
+#cbar = plt.colorbar(tempCONTOURS, orientation='horizontal')
+
+cbar = plt.colorbar(rhFILL, orientation='horizontal')
+cbar.set_label('Relative Humidity (%)')
+cbar.ax.xaxis.set_label_position('top')
+
+# Extract the analysis (run) time and valid forecast time directly from the PyGrib message
+run_time = sfcMSLPMSG.analDate.strftime('%Y-%m-%d %H:%M UTC')
+valid_time = sfcMSLPMSG.validDate.strftime('%Y-%m-%d %H:%M UTC')
+
+# The main bold header
+plt.suptitle('500mb Heights (dm) / Humidity (%)', fontweight='bold', fontsize=13, color='black', y=0.95)
+
+# The normal weight subtitle
+plt.title(f'GFS Model Run: {run_time} | Valid: {valid_time}', fontsize=11, color='black')
+
+plt.show()
     </code></pre>
 
-    <h2>4. Expected Output</h2>
-    <p>When you run the script successfully, you will see the following terminal output, followed by a matplotlib window displaying the weather map.</p>
+    <h2 id="gfs-mslp">2. GFS Data: Mean Sea Level Pressure and Surface Winds</h2>
+    <p>This script overlays surface wind vectors (in MPH and knots) onto Mean Sea Level Pressure contours. It outputs a map complete with wind barbs, colorbars, and regional gridlines.</p>
+    <pre><code class="language-python">
+"""
+Created on Wed Apr 22 15:06:29 2026
+@author: Noelle Davis
+"""
+
+import pygrib 
+import numpy as np 
+import matplotlib.pyplot as plt 
+import cartopy.crs as ccrs 
+import cartopy.feature as cfeature 
+
+# Replace with the path to your desired GRIB2 file.
+grbs = pygrib.open('gfs_4_20121029_0600_027.grb2') 
+
+# Uncomment print statement below to see all messages in the GRIB file
+# for msg in grbs:
+#   print(msg)
+
+# Mean sea level pressure message 
+sfcMSLPMSG = grbs[207]
+
+[lats, lons] = sfcMSLPMSG.latlons() 
+
+# Converts pascals to millibars (hectoPascals)
+sfcMSLP_array = sfcMSLPMSG.values/100
+
+# Wind Messages 
+uMSG = grbs[298] 
+vMSG = grbs[299] 
+
+uKNOT = uMSG.values * 1.94384 
+vKNOT = vMSG.values * 1.94384 
+windMAG=np.sqrt(uKNOT**2 + vKNOT**2)*1.1508
+
+# Sets up the chart and its projection
+fig = plt.figure(figsize=(8, 8)) 
+proj = ccrs.LambertConformal(central_longitude=-90.0, central_latitude=35.0) 
+ax = plt.axes(projection=proj) 
+
+# Updated Extent: 80W to 60W and 35N to 46N 
+ax.set_extent([-80, -60, 35, 46], crs=ccrs.PlateCarree()) 
+
+# Map Features
+ax.add_feature(cfeature.LAND, facecolor='wheat') 
+ax.add_feature(cfeature.OCEAN, facecolor='lightblue') 
+ax.add_feature(cfeature.LAKES, facecolor='lightblue') 
+ax.add_feature(cfeature.STATES, edgecolor='grey') 
+ax.add_feature(cfeature.BORDERS, edgecolor='grey') 
+
+# Gridlines 
+glx = ax.gridlines(crs=ccrs.PlateCarree(),draw_labels=['bottom'], x_inline=False,y_inline=False,rotate_labels=True,color='white', linestyle='--', xlocs=np.arange(-140, -60, 5),ylocs=[]) 
+gly = ax.gridlines(crs=ccrs.PlateCarree(),draw_labels=['right'], x_inline=False,y_inline=False,color='white', linestyle='--', xlocs=[],ylocs=np.arange(20, 60, 4)) 
+glx.xpadding=10
+glx.xlabel_style={'rotation':385}
+
+# Mean Sea Level Pressure Contours 
+MIN = np.min(sfcMSLP_array) 
+MAX = np.max(sfcMSLP_array) 
+LEVELS = np.arange(MIN, MAX, 7) 
+
+bounds=[39,45,61,67,73]
+
+hgtCONTOURS = ax.contour(lons, lats, sfcMSLP_array, levels=LEVELS,colors='black', transform=ccrs.PlateCarree()) 
+ax.clabel(hgtCONTOURS,inline=True,fontsize=8,fmt='%d')
+
+# Wind Contour with Colorbar
+plt.contourf(lons,lats,windMAG,levels=bounds,cmap=plt.cm.autumn_r,transform=ccrs.PlateCarree())
+cbar=plt.colorbar(location='bottom')
+cbar.set_label('MPH')
+
+# Wind Barbs using exact array slicing 
+plt.barbs(lons[::5,::5],lats[::5,::5],uKNOT[::5,::5],vKNOT[::5,::5],transform=ccrs.PlateCarree())
+
+# Extract the analysis (run) time and valid forecast time directly from the PyGrib message
+run_time = sfcMSLPMSG.analDate.strftime('%Y-%m-%d %H:%M UTC')
+valid_time = sfcMSLPMSG.validDate.strftime('%Y-%m-%d %H:%M UTC')
+
+# The main bold header
+plt.suptitle('Mean Sea Level Pressure & Winds', fontweight='bold', fontsize=13, color='black', y=0.95)
+
+# The normal weight subtitle
+plt.title(f'GFS Model Run: {run_time} | Valid: {valid_time}', fontsize=11, color='black')
+
+# Replace the "save figure" naming convention after mslp_winds_ to reflect the naming convention of your choice. 
+plt.savefig('mslp_winds_0600_027')
+plt.show() 
+    </code></pre>
+
+    <h2 id="meteogram">3. Hurricane Sandy Meteogram</h2>
+    <p>Using <code>pandas</code> and <code>matplotlib</code>, this code generates a dual-axis time-series plot (meteogram) showing pressure dropping and corresponding air/water temperatures from the Atlantic City Buoy ACYN4.</p>
+    <pre><code class="language-python">
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Original data was extracted manually from the NDBC website and pasted into a CSV. 
+# Remember to check for NANs!
+sandy_buoy_data = pd.read_csv('buoy_data.csv')
+
+# Combines the Date and time into one column and converts it to datatime
+sandy_buoy_data.columns = sandy_buoy_data.columns.str.strip()
+sandy_buoy_data["Datetime"] = pd.to_datetime(sandy_buoy_data["Date"] + " " + sandy_buoy_data["Time"])
+sandy_buoy_data = sandy_buoy_data.sort_values("Datetime").set_index("Datetime")
+
+sandy_buoy_data["Pressure"] = pd.to_numeric(sandy_buoy_data["Pressure"], errors="coerce")
+sandy_buoy_data["Temp"] = pd.to_numeric(sandy_buoy_data["Temp"], errors="coerce")
+sandy_buoy_data["Water Temp"] = pd.to_numeric(sandy_buoy_data["Water Temp"], errors="coerce")
+
+fig, ax1 = plt.subplots(figsize=(12, 5))
+
+# Pressure
+ax1.plot(sandy_buoy_data.index, sandy_buoy_data["Pressure"], color="tab:blue", label="Pressure")
+ax1.set_ylabel("Pressure (hPa)", color="tab:blue")
+ax1.tick_params(axis="y", labelcolor="tab:blue")
+ax1.grid(True)
+ax1.set_ylim(940, 1015)
+
+# Temperature
+# (sets the water temp and temp to the right y-axis and to share the right side y-axis that shares the same x-axis)
+ax2 = ax1.twinx()
+ax2.plot(sandy_buoy_data.index, sandy_buoy_data["Temp"], color="tab:red", label="Air Temp")
+ax2.plot(sandy_buoy_data.index, sandy_buoy_data["Water Temp"], color="tab:green", label="Water Temp")
+ax2.set_ylabel("Temperature (°C)")
+
+# Legend
+# (combines the axes so the meteogram shares the axes)
+handles, labels = ax1.get_legend_handles_labels()
+handles2, labels2 = ax2.get_legend_handles_labels()
+ax1.legend(handles + handles2, labels + labels2)
+
+plt.title("Atlantic City, NJ: Buoy Station ACYN4 Meteogram")
+plt.show()
+    </code></pre>
+
+    <h2 id="radar">4. Hurricane Sandy Radar Data</h2>
+    <p>This advanced script leverages <code>MetPy</code> to process Level 2 NEXRAD radar data from KDIX (Mt. Holly/Philadelphia). It calculates azimuths and plots a beautiful reflectivity scan showing the storm's structure.</p>
+    <pre><code class="language-python">
+# -*- coding: utf-8 -*-
+# Copyright (c) 2015,2018,2019 MetPy Developers.
+# Distributed under the terms of the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+"""
+Created on Wed Apr 29 15:08:03 2026
+@author: Noelle Davis
+"""
+
+import cartopy.crs as ccrs
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+import numpy as np
+
+from metpy.calc import azimuth_range_to_lat_lon
+from metpy.cbook import get_test_data
+from metpy.io import Level2File
+#from metpy.plots import add_metpy_logo, add_timestamp, USCOUNTIES
+from metpy.plots import USCOUNTIES
+from metpy.units import units
+
+###########################################
+# Open the file
+f = Level2File('KDIX20121030_055815_V06')
+print(f.sweeps[0][0])
+###########################################
+
+# Pull data out of the file
+sweep = 0
+
+# First item in ray is header, which has azimuth angle
+az = np.array([ray[0].az_angle for ray in f.sweeps[sweep]])
+
+###########################################
+# We need to take the single azimuth (nominally a mid-point) we get in the data and
+# convert it to be the azimuth of the boundary between rays of data, taking care to handle
+# where the azimuth crosses from 0 to 360.
+diff = np.diff(az)
+crossed = diff &lt; -180
+diff[crossed] += 360.
+avg_spacing = diff.mean()
+
+# Convert mid-point to edge
+az = (az[:-1] + az[1:]) / 2
+az[crossed] += 180.
+
+# Concatenate with the overall start and end of data we calculate using the average spacing
+az = np.concatenate(([az[0] - avg_spacing], az, [az[-1] + avg_spacing]))
+az = units.Quantity(az, 'degrees')
+
+###########################################
+# Calculate ranges for the gates from the metadata
+
+# 5th item is a dict mapping a var name (byte string) to a tuple
+# of (header, data array)
+ref_hdr = f.sweeps[sweep][0][4][b'REF'][0]
+ref_range = (np.arange(ref_hdr.num_gates + 1) - 0.5) * ref_hdr.gate_width + ref_hdr.first_gate
+ref_range = units.Quantity(ref_range, 'kilometers')
+ref = np.array([ray[4][b'REF'][1] for ray in f.sweeps[sweep]])
+
+rho_hdr = f.sweeps[sweep][0][4][b'RHO'][0]
+rho_range = (np.arange(rho_hdr.num_gates + 1) - 0.5) * rho_hdr.gate_width + rho_hdr.first_gate
+rho_range = units.Quantity(rho_range, 'kilometers')
+rho = np.array([ray[4][b'RHO'][1] for ray in f.sweeps[sweep]])
+
+# Extract central longitude and latitude from file
+cent_lon = f.sweeps[0][0][1].lon
+cent_lat = f.sweeps[0][0][1].lat
+###########################################
+
+spec = gridspec.GridSpec(1, 1)
+fig = plt.figure(figsize=(8,8))
+
+for var_data, var_range, ax_rect in zip((ref, rho), (ref_range, rho_range), spec):
+    # Turn into an array, then mask
+    data = np.ma.array(var_data)
+    data[np.isnan(data)] = np.ma.masked
+    LEVELS=[-10,0,10,20,30,40,50,60]
+ 
+    # Convert az,range to x,y
+    xlocs, ylocs = azimuth_range_to_lat_lon(az, var_range, cent_lon, cent_lat)
+
+    # Plot the data
+    crs = ccrs.LambertConformal(central_longitude=cent_lon, central_latitude=cent_lat)
+    ax = fig.add_subplot(ax_rect, projection=crs)
+    ax.add_feature(USCOUNTIES, linewidth=0.5)
+    pcm=ax.pcolormesh(xlocs, ylocs, data, cmap='nipy_spectral',vmin=-10,vmax=60, transform=ccrs.PlateCarree())
+    ax.set_extent([cent_lon - 3, cent_lon + 3, cent_lat - 3, cent_lat + 3])
+    ax.set_aspect('equal', 'datalim')
+    glx = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=['bottom'],x_inline=False,y_inline=False,rotate_labels=True,
+                      linewidth=2, color='grey', alpha=0.5, linestyle='--')
+    gly = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=['right'],x_inline=False,y_inline=False,
+                      linewidth=2, color='grey', alpha=0.5, linestyle='--')
+    gly.top_labels=False
+    glx.left_labels=False
+    glx.xpadding=10
+    glx.xlabel_style={'rotation':385}
+    plt.title("KDIX - MT. HOLLY/PHILADEPHIA, NJ Radar 1:58 AM EDT Oct. 30, 2012")
     
-    <div class="output-box">
-        Fetching GFS Data for Hurricane Sandy...<br>
-        Plotting 500mb Geopotential Height.<br>
-        > Map generated successfully.
-    </div>
+    cbar=plt.colorbar(pcm,ax=ax,location='bottom')
+    cbar.set_label('Reflectivity (dBZ)')
+ 
+plt.savefig('Radar_1030_055815')
+plt.show()
+    </code></pre>
+
+    <h2 id="soundings">5. Hurricane Sandy Related Soundings</h2>
+    <p>Utilizes the <code>sounderpy</code> library to pull upper-air sounding observations from station OKX (Upton, NY) during the critical days of the storm's landfall (Oct 29-30, 2012).</p>
+    <pre><code class="language-python">
+# For more information on sounderpy, check out their documentation here --&gt; https://kylejgillett.github.io/sounderpy/
+
+import sounderpy as spy
+
+okx_oct29_12z_sounding = spy.get_obs_data('OKX', '2012', '10', '29', '12')
+spy.build_sounding(okx_oct29_12z_sounding)
+
+okx_oct30_0z_sounding = spy.get_obs_data('OKX', '2012', '10', '30', '0')
+spy.build_sounding(okx_oct30_0z_sounding, special_parcels=False)
+
+okx_oct30_12z_sounding = spy.get_obs_data('OKX', '2012', '10', '30', '12')
+spy.build_sounding(okx_oct30_12z_sounding)
+    </code></pre>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
