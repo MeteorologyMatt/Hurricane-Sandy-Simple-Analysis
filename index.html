@@ -3,90 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hurricane Sandy Python Analysis - Documentation</title>
+    <title>Hurricane Sandy Analysis - GR4553 Group 3</title>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet" />
+
     <style>
         :root {
-            --bg-color: #f9fafb;
-            --text-color: #1f2937;
-            --primary-color: #2563eb;
-            --border-color: #e5e7eb;
+            --bg-color: #0f172a;       /* Deep slate/navy background */
+            --card-bg: #1e293b;        /* Lighter slate for cards */
+            --text-main: #f8fafc;      /* Crisp white text */
+            --text-muted: #94a3b8;     /* Soft gray for descriptions */
+            --accent: #38bdf8;         /* Cyan/Blue accent */
+            --border-color: #334155;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
-            max-width: 900px;
+            color: var(--text-main);
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 60px 20px;
         }
-        header {
-            text-align: center;
-            margin-bottom: 40px;
+
+        /* Typography & Headers */
+        h1, h2, h3 {
+            color: var(--text-main);
+            font-weight: 700;
+            margin-top: 0;
         }
+
         h1 {
-            color: #111827;
-            font-size: 2.5em;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: -webkit-linear-gradient(45deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 50px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            color: var(--accent);
             margin-bottom: 10px;
         }
-        h2 {
-            color: #111827;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 8px;
-            margin-top: 50px;
+
+        p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
         }
-        h3 { margin-top: 30px; color: #374151; }
-        p, li { font-size: 1.05em; }
-        .toc {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 40px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .toc ul { list-style-type: none; padding-left: 0; }
-        .toc li { margin-bottom: 10px; }
-        .toc a {
-            color: var(--primary-color);
+
+        a {
+            color: var(--accent);
             text-decoration: none;
-            font-weight: 500;
+            border-bottom: 1px dashed var(--accent);
+            transition: all 0.2s;
         }
-        .toc a:hover { text-decoration: underline; }
-        
-        /* Prism overrides */
+
+        a:hover {
+            color: #7dd3fc;
+            border-bottom: 1px solid #7dd3fc;
+        }
+
+        /* Layout Cards */
+        .info-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Code Block Styling overrides */
         pre[class*="language-"] {
-            border-radius: 8px;
-            margin: 20px 0 40px 0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background-color: #0b0f19 !important; /* Extra dark background for code */
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px !important;
+            margin: 20px 0 40px 0 !important;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        code[class*="language-"] {
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 0.95rem !important;
+            line-height: 1.5 !important;
+        }
+
+        /* Inline code */
+        :not(pre) > code[class*="language-"] {
+            background: #0b0f19 !important;
+            color: var(--accent) !important;
+            padding: 3px 6px !important;
+            border-radius: 4px !important;
         }
     </style>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet" />
 </head>
 <body>
 
-    <header>
-        <h1>Hurricane Sandy Analysis</h1>
-        <p>Comprehensive Python documentation for meteorological data extraction, processing, and visualization.</p>
-    </header>
+    <div class="container">
+        <div class="info-card" style="border-top: 4px solid var(--accent);">
+            <h1>GR4553 Group 3 Final Project</h1>
+            <h3>Hurricane Sandy Analysis</h3>
+            <p><strong>Project Overview:</strong> This project examines the devastating nature and unique characteristics of Hurricane Sandy. This repository includes radar imagery, soundings and meteograms, mean sea level pressure (MSLP) and wind maps, as well as 500mb geopotential height and relative humidity charts to illustrate the meteorological evolution leading up to and during the event.</p>
+        </div>
 
-    <div class="toc">
-        <h3>Table of Contents</h3>
-        <ul>
-            <li><a href="#gfs-500mb">1. GFS Data: 500mb Geopotential Height and Relative Humidity</a></li>
-            <li><a href="#gfs-mslp">2. GFS Data: Mean Sea Level Pressure and Surface Winds</a></li>
-            <li><a href="#meteogram">3. Buoy Station Meteogram</a></li>
-            <li><a href="#radar">4. KDIX Radar Data Analysis</a></li>
-            <li><a href="#soundings">5. Related Atmospheric Soundings</a></li>
-        </ul>
-    </div>
+        <h2>Methodology & Data Sources</h2>
+        <div class="grid-2-col">
+            <div class="info-card" style="margin-bottom: 0;">
+                <h3>Radar Plots and Code</h3>
+                <p>Radar data was sourced from Amazon Web Services' open NEXRAD Level II archive. The Python scripts in this directory generate radar base reflectivity plots illustrating the structure and intensity of Hurricane Sandy. To use a different radar file, you can replace the filename in the script. For example: <code class="language-python">f = Level2File('KxxxYYYYMMDD_HHMMSS_V06')</code>.</p>
+            </div>
+            
+            <div class="info-card" style="margin-bottom: 0;">
+                <h3>Soundings and Meteogram Code</h3>
+                <p>The soundings for this project were generated using the <code>sounderpy</code> Python library. This requires no external downloadable content; users simply need to specify the time of the event within the script to automatically retrieve and plot the upper-air data.</p>
+            </div>
 
-    <h2 id="gfs-500mb">1. GFS Data: 500mb Geopotential Height & Relative Humidity</h2>
-    <p>This script processes GRIB2 data to extract the 500mb geopotential height and relative humidity. It creates a cropped regional map using Cartopy, converting heights to decameters and temperatures to Celsius.</p>
-    <pre><code class="language-python">
+            <div class="info-card" style="margin-bottom: 0;">
+                <h3>Buoy Data</h3>
+                <p>To analyze surface-level changes, buoy data was retrieved from the National Data Buoy Center (NDBC). Click <a href="#">here for the Station ACYN4 data</a> to highlight the significant pressure drop and subsequent rise before and after Sandy's passing.</p>
+            </div>
+
+            <div class="info-card" style="margin-bottom: 0;">
+                <h3>GFS Analysis: Heights, MSLP & Winds</h3>
+                <p>The maps displaying 500mb geopotential height with relative humidity, as well as MSLP with surface winds, were created using GFS analysis data. Click <a href="#">here for the NCEI NOAA archive</a> to retrieve this data. To replicate or adjust it, navigate to the link and select the specific time of interest (for instance, October 29th for the peak time of Hurricane Sandy).</p>
+            </div>
+        </div>
+
+        <h2>Project Python Code</h2>
+
+        <h3>1. 500mb Geopotential Height and Relative Humidity</h3>
+        <p>Processes GRIB2 data to map heights (dm) and humidity during the event.</p>
+        <pre><code class="language-python">
 """
 Created on Wed Apr 22 15:09:48 2026
 @author: Matthew Lentz
@@ -178,8 +254,8 @@ cbar.set_label('Relative Humidity (%)')
 cbar.ax.xaxis.set_label_position('top')
 
 # Extract the analysis (run) time and valid forecast time directly from the PyGrib message
-run_time = sfcMSLPMSG.analDate.strftime('%Y-%m-%d %H:%M UTC')
-valid_time = sfcMSLPMSG.validDate.strftime('%Y-%m-%d %H:%M UTC')
+run_time = hgtMSG.analDate.strftime('%Y-%m-%d %H:%M UTC')
+valid_time = hgtMSG.validDate.strftime('%Y-%m-%d %H:%M UTC')
 
 # The main bold header
 plt.suptitle('500mb Heights (dm) / Humidity (%)', fontweight='bold', fontsize=13, color='black', y=0.95)
@@ -188,11 +264,12 @@ plt.suptitle('500mb Heights (dm) / Humidity (%)', fontweight='bold', fontsize=13
 plt.title(f'GFS Model Run: {run_time} | Valid: {valid_time}', fontsize=11, color='black')
 
 plt.show()
-    </code></pre>
+        </code></pre>
 
-    <h2 id="gfs-mslp">2. GFS Data: Mean Sea Level Pressure and Surface Winds</h2>
-    <p>This script overlays surface wind vectors (in MPH and knots) onto Mean Sea Level Pressure contours. It outputs a map complete with wind barbs, colorbars, and regional gridlines.</p>
-    <pre><code class="language-python">
+
+        <h3>2. MSLP and Surface Winds</h3>
+        <p>Overlays surface wind vectors onto Mean Sea Level Pressure contours.</p>
+        <pre><code class="language-python">
 """
 Created on Wed Apr 22 15:06:29 2026
 @author: Noelle Davis
@@ -278,12 +355,12 @@ plt.title(f'GFS Model Run: {run_time} | Valid: {valid_time}', fontsize=11, color
 
 # Replace the "save figure" naming convention after mslp_winds_ to reflect the naming convention of your choice. 
 plt.savefig('mslp_winds_0600_027')
-plt.show() 
-    </code></pre>
+plt.show()
+        </code></pre>
 
-    <h2 id="meteogram">3. Hurricane Sandy Meteogram</h2>
-    <p>Using <code>pandas</code> and <code>matplotlib</code>, this code generates a dual-axis time-series plot (meteogram) showing pressure dropping and corresponding air/water temperatures from the Atlantic City Buoy ACYN4.</p>
-    <pre><code class="language-python">
+        <h3>3. Hurricane Sandy Meteogram</h3>
+        <p>Generates a dual-axis time-series plot utilizing data manually extracted from the NDBC.</p>
+        <pre><code class="language-python">
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -324,11 +401,12 @@ ax1.legend(handles + handles2, labels + labels2)
 
 plt.title("Atlantic City, NJ: Buoy Station ACYN4 Meteogram")
 plt.show()
-    </code></pre>
+        </code></pre>
 
-    <h2 id="radar">4. Hurricane Sandy Radar Data</h2>
-    <p>This advanced script leverages <code>MetPy</code> to process Level 2 NEXRAD radar data from KDIX (Mt. Holly/Philadelphia). It calculates azimuths and plots a beautiful reflectivity scan showing the storm's structure.</p>
-    <pre><code class="language-python">
+
+        <h3>4. Hurricane Sandy Radar Data</h3>
+        <p>Uses MetPy to process AWS NEXRAD Level II archive data and calculates base reflectivity structure.</p>
+        <pre><code class="language-python">
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015,2018,2019 MetPy Developers.
 # Distributed under the terms of the BSD 3-Clause License.
@@ -433,11 +511,11 @@ for var_data, var_range, ax_rect in zip((ref, rho), (ref_range, rho_range), spec
  
 plt.savefig('Radar_1030_055815')
 plt.show()
-    </code></pre>
+        </code></pre>
 
-    <h2 id="soundings">5. Hurricane Sandy Related Soundings</h2>
-    <p>Utilizes the <code>sounderpy</code> library to pull upper-air sounding observations from station OKX (Upton, NY) during the critical days of the storm's landfall (Oct 29-30, 2012).</p>
-    <pre><code class="language-python">
+        <h3>5. Related Soundings</h3>
+        <p>Utilizes the <code>sounderpy</code> Python library to retrieve and plot upper-air data.</p>
+        <pre><code class="language-python">
 # For more information on sounderpy, check out their documentation here --&gt; https://kylejgillett.github.io/sounderpy/
 
 import sounderpy as spy
@@ -450,12 +528,13 @@ spy.build_sounding(okx_oct30_0z_sounding, special_parcels=False)
 
 okx_oct30_12z_sounding = spy.get_obs_data('OKX', '2012', '10', '30', '12')
 spy.build_sounding(okx_oct30_12z_sounding)
-    </code></pre>
+        </code></pre>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+
 </body>
 </html>
